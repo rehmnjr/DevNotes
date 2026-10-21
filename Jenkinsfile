@@ -9,7 +9,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out DevNotes source code'
                 checkout scm
                 sh 'git log -1 --oneline'
             }
@@ -22,7 +21,7 @@ pipeline {
                     test -f backend/main.py
                     test -f frontend/Dockerfile
                     test -f docker-compose.yml
-                    echo "All required files are present."
+                    echo "Required files verified."
                 '''
             }
         }
@@ -35,23 +34,52 @@ pipeline {
 
         stage('Build Backend Image') {
             steps {
-                sh 'docker build -t devnotes-backend:latest ./backend'
+                sh '''
+                    docker build --platform linux/amd64 \
+                      -t rehmnjr/devnotes-backend:latest ./backend
+                '''
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                sh 'docker build -t devnotes-frontend:latest ./frontend'
+                sh '''
+                    docker build --platform linux/amd64 \
+                      -t rehmnjr/devnotes-frontend:latest ./frontend
+                '''
+            }
+        }
+
+        stage('Push Images to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        set +x
+                        echo "$DOCKERHUB_PASSWORD" | \
+                          docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+                        docker push rehmnjr/devnotes-backend:latest
+                        docker push rehmnjr/devnotes-frontend:latest
+
+                        docker logout
+                    '''
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'DevNotes CI pipeline completed successfully!'
+            echo 'DevNotes images built and pushed successfully!'
         }
         failure {
-            echo 'DevNotes CI pipeline failed. Check Console Output.'
+            echo 'Pipeline failed. Check Console Output.'
         }
     }
 }
