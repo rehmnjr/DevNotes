@@ -1,0 +1,26 @@
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: devnotes-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "sqlite:////data/devnotes.db"
+    volumes:
+      - devnotes_data:/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: devnotes-ui
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  devnotes_data:

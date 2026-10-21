@@ -1,0 +1,26 @@
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.env
+.env.*
+
+# Node.js
+node_modules/
+dist/
+npm-debug.log*
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# OS and editor
+.DS_Store
+.vscode/
+
+# Secrets
+*.pem
+*.key
