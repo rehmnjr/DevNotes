@@ -27,20 +27,38 @@ app.add_middleware(
 
 
 # Database configuration
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///./devnotes.db",
-)
+DB_HOST = os.getenv("DB_HOST")
 
-# Create the database directory when using the persistent Docker path.
-if DATABASE_URL.startswith("sqlite:////data/"):
-    Path("/data").mkdir(parents=True, exist_ok=True)
+if DB_HOST:
+    from sqlalchemy.engine import URL
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+    database_url = URL.create(
+        drivername="mysql+pymysql",
+        username=os.getenv("DB_USER", "devnotesadmin"),
+        password=os.environ["DB_PASSWORD"],
+        host=DB_HOST,
+        port=int(os.getenv("DB_PORT", "3306")),
+        database=os.getenv("DB_NAME", "devnotes"),
+    )
 
+    engine = create_engine(
+        database_url,
+        pool_pre_ping=True,
+    )
+else:
+    DATABASE_URL = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///./devnotes.db",
+    )
+
+    if DATABASE_URL.startswith("sqlite:////data/"):
+        Path("/data").mkdir(parents=True, exist_ok=True)
+
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+    )
+    
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,

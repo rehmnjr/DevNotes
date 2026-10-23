@@ -3,8 +3,8 @@ services:
     build:
       context: ./backend
     container_name: devnotes-api
-    environment:
-      DATABASE_URL: "sqlite:////data/devnotes.db"
+    env_file:
+      - .env
     volumes:
       - devnotes_data:/data
     expose:
