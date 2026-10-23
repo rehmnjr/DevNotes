@@ -646,9 +646,6 @@ Contributions and suggestions are welcome.
 4. Commit with a descriptive message.
 5. Open a pull request describing the change.
 
-## License
-
-No license has been selected yet. Add a `LICENSE` file and update this section before distributing the project under an open-source license.
 
 ---
 
